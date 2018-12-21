@@ -29,7 +29,8 @@ void loop() {
   getUdpPacket();
 
   //TODO いい感じの光らせ方を何パターンかつくる
-  allShine();
+  //TODO パケット情報に光らせ方のパターン値を追加し、分岐させて対応する関数を呼び出す
+  alternatelyShine();
 }
 void getUdpPacket() {
   udp.recieve_packet();
@@ -50,46 +51,95 @@ void udpPacketToColor(String command) {
   brightness = command.substring(9, 12).toInt();
 }
 
+//すべてのLEDが一色で一斉に光る
 void allShine(){
-  for(int i=0; i<LED_NUM; i++){
+  int i;
+  for(i=0; i<LED_NUM; i++){
     led.setPixelColor(i, led.Color(colorR, colorG, colorB));
     led.setBrightness(brightness);
   }
   led.show();
 }
 
+//LEDが一つづつ光り始めて、全点灯のままになる(すべて同色)
 void oneByOneShine(){
+  int i;
   if (oneByOneShineFlag) {
-    for (int i = 0; i < LED_NUM; i++) {
+    for (i = 0; i < LED_NUM; i++) {
       led.setPixelColor(i, led.Color(colorR, colorG, colorB));
       led.setBrightness(brightness);
-      delay(100);
       led.show();
       oneByOneShineFlag = false;
+      delay(25);
     }
   }
 }
 
+//LED5個ずつが同色で光る→消えるを繰り返す
 void fiveFlowShine(){
-  for(int i=0; i<LED_NUM; i=i+5){
-    fiveFlowShineExe(i);
+  int startIndex = 0;
+  int lastIndex = 5;
+  while(startIndex <= LED_NUM - 5){
+    fiveFlowShineExe(startIndex, lastIndex);
+    startIndex += 5;
+    lastIndex += 5;
   }
 }
 
-void fiveFlowShineExe(int led_num){
+void fiveFlowShineExe(int startIndex, int lastIndex){
   int i;
-  for (i = led_num; i < i + 5; i++)
+  for (i = startIndex; i < lastIndex; i++)
   {
     led.setPixelColor(i, led.Color(colorR, colorG, colorB));
     led.setBrightness(brightness);
   }
   led.show();
-  delay(800);
+  delay(300);
 
-  for (i = led_num; i < i + 5; i++)
+  for (i = startIndex; i < lastIndex; i++)
   {
     led.setPixelColor(i, led.Color(0, 0, 0));
     led.setBrightness(0);
+  }
+  led.show();
+}
+
+//LEDを等間隔で光らせる (1個空け、全て同色)
+void alternatelyShine(){
+  evenLedShineExe();
+  delay(1000);
+  oddLedShineExe();
+}
+
+void evenLedShineExe(){
+  int i;
+  for (i = 1; i < LED_NUM; i = i + 2)
+  {
+    led.setPixelColor(i, led.Color(0, 0, 0));
+    led.setBrightness(0);
+  }
+  led.show();
+
+  for (i = 0; i < LED_NUM; i = i + 2)
+  {
+    led.setPixelColor(i, led.Color(colorR, colorG, colorB));
+    led.setBrightness(brightness);
+  }
+  led.show();
+}
+
+void oddLedShineExe(){
+  int i;
+  for (i = 0; i < LED_NUM; i = i + 2)
+  {
+    led.setPixelColor(i, led.Color(0, 0, 0));
+    led.setBrightness(0);
+  }
+  led.show();
+
+  for(i=1; i<LED_NUM; i=i+2){
+    led.setPixelColor(i, led.Color(colorR, colorG, colorB));
+    led.setBrightness(brightness);
   }
   led.show();
 }
