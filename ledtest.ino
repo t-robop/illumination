@@ -52,8 +52,8 @@ void loop() {
   //TODO いい感じの光らせ方を何パターンかつくる
   //TODO パケット情報に光らせ方のパターン値を追加し、分岐させて対応する関数を呼び出す
   //rasenShine();
-  state1 = state - 10;
-  state2 = state - 20;
+  int state1 = state - 10;
+  int state2 = state - 20;
   if (state <= 50 && state >= 0) {
     colorRArray[state] = colorR;
     colorRArray[state] = colorG;
