@@ -47,7 +47,7 @@ void setup() {
 }
 
 void loop() {
-  getUdpPacket();
+  //getUdpPacket();
 
   //TODO いい感じの光らせ方を何パターンかつくる
   //TODO パケット情報に光らせ方のパターン値を追加し、分岐させて対応する関数を呼び出す
@@ -55,33 +55,39 @@ void loop() {
   int state1 = state - 10;
   int state2 = state - 20;
   if (state <= 50 && state >= 0) {
-    colorRArray[state] = colorR;
-    colorRArray[state] = colorG;
-    colorRArray[state] = colorB;
+    colorRArray[state] = 255;//colorR;
+    colorGArray[state] = 0;//colorG;
+    colorBArray[state] = 0;//0colorB;
     gaoScene(state);
   }
   
   if (state1 <= 50 && state1 >= 0) {
-    colorRArray[state2] = colorRSecond;
-    colorRArray[state2] = colorGSecond;
-    colorRArray[state2] = colorBSecond;
+    colorRArray[state1] = 0;//colorRSecond;
+    colorGArray[state1] = 255;//colorGSecond;
+    colorBArray[state1] = 0;//colorBSecond;
     gaoScene(state1);
   }
   if (state2 <= 50 && state2 >= 0) {
-    colorRArray[state2] = colorRThird;
-    colorRArray[state2] = colorGThird;
-    colorRArray[state2] = colorBThird;
+    Serial.println(state2);
+    colorRArray[state2] = 0;//colorRThird;
+    colorGArray[state2] = 0;//colorGThird;
+    colorBArray[state2] = 255;//colorBThird;
     gaoScene(state2);
   }
 
   led.show();
-  delay(50);
-
+  delay(500);
+  state++;
+  if(state2 > 50){
+    state = 0;
+  }
 }
 
 void gaoScene(int num) {
   led.setPixelColor(num, led.Color(colorRArray[num], colorGArray[num], colorBArray[num]));
-  state++;
+  led.setBrightness(255);
+  //Serial.println(num);
+  //state++;
 }
 
 void getUdpPacket() {
