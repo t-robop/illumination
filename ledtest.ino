@@ -7,8 +7,24 @@ Adafruit_NeoPixel led = Adafruit_NeoPixel(LED_NUM, PIN, NEO_RGB + NEO_KHZ800);  
 int colorR = 0;
 int colorG = 0;
 int colorB = 0;
+
+int colorRSecond = 0;
+int colorGSecond = 0;
+int colorBSecond = 0;
+
+int colorRThird = 0;
+int colorGThird = 0;
+int colorBThird = 0;
+
 int brightness = 0;
 bool oneByOneShineFlag = true;
+
+bool firstShineState = false;
+bool secondShineState = false;
+bool thirdShineState = false;
+int firstShineIndex = 0;
+int secondShineIndex = 0;
+int thirdShineIndex = 0;
 
 Udp udp;
 char ssid[] = "ERS-AP";
@@ -30,24 +46,74 @@ void loop() {
 
   //TODO いい感じの光らせ方を何パターンかつくる
   //TODO パケット情報に光らせ方のパターン値を追加し、分岐させて対応する関数を呼び出す
-  oneByOneShine();
+  rasenShine();
 }
 void getUdpPacket() {
+  int colorState = 0;
   udp.recieve_packet();
   String commands = udp.get_packet_buffer();
   if (commands.length() > 0) {
-    udpPacketToColor(commands);
+    if (firstShineState == false)
+    {
+      colorR = commands.substring(0, 3).toInt();
+      colorG = commands.substring(3, 6).toInt();
+      colorB = commands.substring(6, 9).toInt();
+
+      firstShineState = true;
+      delay(10);
+    }
+    else if (firstShineState == true && secondShineState == false)
+    {
+      colorRSecond = commands.substring(0, 3).toInt();
+      colorGSecond = commands.substring(0, 3).toInt();
+      colorBSecond = commands.substring(0, 3).toInt();
+      secondShineState = true;
+      delay(10);
+    }
+    else if(firstShineState == true && secondShineState == true && thirdShineState == false)
+    {
+      colorRThird = commands.substring(0, 3).toInt();
+      colorGThird = commands.substring(0, 3).toInt();
+      colorBThird = commands.substring(0, 3).toInt();
+      thirdShineState = true;
+      delay(10);
+    }
+    brightness = commands.substring(9, 12).toInt();
+    //udpPacketToColor(commands, colorState);
     udp.clear_packet_buffer();
     oneByOneShineFlag = true;
   }
   delay(1000);
 }
 
-void udpPacketToColor(String command) {
+void udpPacketToColor(String command, int colorState) {
   // 中身 Rカラー,Gカラー,Bカラー,明るさ
-  colorR = command.substring(0, 3).toInt();
-  colorG = command.substring(3, 6).toInt();
-  colorB = command.substring(6, 9).toInt();
+
+  
+  switch (colorState)
+  {
+    case 1:
+      colorR = command.substring(0, 3).toInt();
+      colorG = command.substring(3, 6).toInt();
+      colorB = command.substring(6, 9).toInt();
+      break;
+
+    case 2:
+      colorRSecond = command.substring(0, 3).toInt();
+      colorGSecond = command.substring(0, 3).toInt();
+      colorBSecond = command.substring(0, 3).toInt();
+      break;
+
+    case 3:
+      colorRThird = command.substring(0, 3).toInt();
+      colorGThird = command.substring(0, 3).toInt();
+      colorBThird = command.substring(0, 3).toInt();
+      break;
+
+    default:
+      break;
+  }
+
   brightness = command.substring(9, 12).toInt();
 }
 
@@ -74,6 +140,52 @@ void oneByOneShine(){
     }
   }
 }
+
+void rasenShine(){
+  while (firstShineIndex < LED_NUM && secondShineIndex < LED_NUM && thirdShineIndex < LED_NUM)
+  {
+
+    if (firstShineState == true && secondShineState == false && thirdShineState == false)
+    {
+      Serial.println("first");
+      led.setPixelColor(firstShineIndex, led.Color(colorR, colorG, colorB));
+      led.setBrightness(brightness);
+      led.show();
+      delay(50);
+      firstShineIndex++;
+    }
+    else if (firstShineState == true && secondShineState == true && thirdShineState == false)
+    {
+      Serial.println("second");
+      led.setPixelColor(firstShineIndex, led.Color(colorR, colorG, colorB));
+      led.setPixelColor(secondShineIndex, led.Color(colorRSecond, colorGSecond, colorBSecond));
+      led.setBrightness(brightness);
+      led.show();
+      delay(50);
+      firstShineIndex++;
+      secondShineIndex++;
+    }
+    else if (firstShineState == true && secondShineState == true && thirdShineState == true)
+    {
+      Serial.println("third");
+      led.setPixelColor(firstShineIndex, led.Color(colorR, colorG, colorB));
+      led.setPixelColor(secondShineIndex, led.Color(colorRSecond, colorGSecond, colorBSecond));
+      led.setPixelColor(thirdShineIndex, led.Color(colorRThird, colorGThird, colorBThird));
+      led.setBrightness(brightness);
+      led.show();
+      delay(50);
+      firstShineIndex++;
+      secondShineIndex++;
+      thirdShineIndex++;
+    }
+  }
+  firstShineIndex = 0;
+  secondShineIndex = 0;
+  thirdShineIndex = 0;
+}
+
+
+// i++;
 
 //LED5個ずつが同色で光る→消えるを繰り返す
 void fiveFlowShine(){
