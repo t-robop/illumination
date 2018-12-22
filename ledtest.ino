@@ -30,7 +30,7 @@ void loop() {
 
   //TODO いい感じの光らせ方を何パターンかつくる
   //TODO パケット情報に光らせ方のパターン値を追加し、分岐させて対応する関数を呼び出す
-  alternatelyShine();
+  oneByOneShine();
 }
 void getUdpPacket() {
   udp.recieve_packet();
@@ -61,7 +61,7 @@ void allShine(){
   led.show();
 }
 
-//LEDが一つづつ光り始めて、全点灯のままになる(すべて同色)
+//LEDが一つづつ光り始めて、全点灯のままになる(すべて同色) //TODO 3段階で色を変更する 色の指定は後から追えるようにする
 void oneByOneShine(){
   int i;
   if (oneByOneShineFlag) {
@@ -70,7 +70,7 @@ void oneByOneShine(){
       led.setBrightness(brightness);
       led.show();
       oneByOneShineFlag = false;
-      delay(25);
+      delay(50);
     }
   }
 }
