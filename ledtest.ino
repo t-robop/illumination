@@ -26,6 +26,11 @@ int firstShineIndex = 0;
 int secondShineIndex = 0;
 int thirdShineIndex = 0;
 
+int colorRArray[50];
+int colorGArray[50];
+int colorBArray[50];
+int state = 0;
+
 Udp udp;
 char ssid[] = "ERS-AP";
 char password[] = "robop0304";
@@ -46,8 +51,39 @@ void loop() {
 
   //TODO いい感じの光らせ方を何パターンかつくる
   //TODO パケット情報に光らせ方のパターン値を追加し、分岐させて対応する関数を呼び出す
-  rasenShine();
+  //rasenShine();
+  state1 = state - 10;
+  state2 = state - 20;
+  if (state <= 50 && state >= 0) {
+    colorRArray[state] = colorR;
+    colorRArray[state] = colorG;
+    colorRArray[state] = colorB;
+    gaoScene(state);
+  }
+  
+  if (state1 <= 50 && state1 >= 0) {
+    colorRArray[state2] = colorRSecond;
+    colorRArray[state2] = colorGSecond;
+    colorRArray[state2] = colorBSecond;
+    gaoScene(state1);
+  }
+  if (state2 <= 50 && state2 >= 0) {
+    colorRArray[state2] = colorRThird;
+    colorRArray[state2] = colorGThird;
+    colorRArray[state2] = colorBThird;
+    gaoScene(state2);
+  }
+
+  led.show();
+  delay(50);
+
 }
+
+void gaoScene(int num) {
+  led.setPixelColor(num, led.Color(colorRArray[num], colorGArray[num], colorBArray[num]));
+  state++;
+}
+
 void getUdpPacket() {
   int colorState = 0;
   udp.recieve_packet();
